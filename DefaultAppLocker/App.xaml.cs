@@ -9,9 +9,17 @@ namespace DefaultAppLocker;
 public partial class App : Application
 {
     private const int AttachParentProcess = -1;
+    private const int StandardOutputHandle = -11;
+    private const int StandardErrorHandle = -12;
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool AttachConsole(int dwProcessId);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr GetStdHandle(int nStdHandle);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    private static extern bool WriteConsoleW(IntPtr hConsoleOutput, string lpBuffer, int nNumberOfCharsToWrite, out int lpNumberOfCharsWritten, IntPtr lpReserved);
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -38,8 +46,15 @@ public partial class App : Application
     private static void WriteCommandLineMessage(string message, bool success)
     {
         AttachConsole(AttachParentProcess);
+        var text = message + Environment.NewLine;
+        var handle = GetStdHandle(success ? StandardOutputHandle : StandardErrorHandle);
+        if (handle != IntPtr.Zero && handle != new IntPtr(-1) && WriteConsoleW(handle, text, text.Length, out _, IntPtr.Zero))
+        {
+            return;
+        }
+
         var stream = success ? Console.OpenStandardOutput() : Console.OpenStandardError();
-        using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
-        writer.WriteLine(message);
+        using var writer = new StreamWriter(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)) { AutoFlush = true };
+        writer.Write(text);
     }
 }
