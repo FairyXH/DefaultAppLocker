@@ -1,4 +1,4 @@
-namespace DefaultAppLocker.Core;
+﻿namespace DefaultAppLocker.Core;
 
 public sealed record CommandLineResult(bool Handled, int ExitCode, string Message);
 
@@ -70,6 +70,11 @@ public sealed class DefaultAppLockerCommandLine
                 var result = await new SetUserFtaService(_store, _associationService).ApplyAsync(_store.LoadConfig().Snapshot, cancellationToken).ConfigureAwait(false);
                 return new CommandLineResult(true, result.Success ? 0 : Math.Max(1, result.ExitCode), result.Success ? "已恢复当前配置快照。" : result.Error);
             }
+            if (map.ContainsKey("lock-monitor"))
+            {
+                await new LockingService(_store).RunMonitorOnceAsync(_scanner, cancellationToken).ConfigureAwait(false);
+                return new CommandLineResult(true, 0, "持续锁定检查完成。");
+            }
 
             return new CommandLineResult(true, 2, "未知命令行参数。" + Environment.NewLine + Usage);
         }
@@ -127,24 +132,38 @@ public sealed class DefaultAppLockerCommandLine
     }
 
     public const string Usage = """
-DefaultAppLocker 命令行用法（所有命令均静默运行，不启动 GUI）：
+DefaultAppLocker 命令行用法（任一 -- 参数都会进入命令行模式，不启动 GUI）：
+
   DefaultAppLocker.exe --capture-snapshot [别名]
-      扫描当前用户默认应用并保存为配置快照。
+      扫描当前用户默认应用关联，并保存为新的配置快照；别名可省略。
+
   DefaultAppLocker.exe --export-all <path.json>
-      导出全部配置快照和默认应用模板方案。
+      导出全部配置快照和默认应用模板方案到指定 JSON 文件。
+
   DefaultAppLocker.exe --export-snapshots <path.json>
-      仅导出配置快照。
+      仅导出配置快照到指定 JSON 文件。
+
   DefaultAppLocker.exe --export-templates <path.json>
-      仅导出默认应用模板方案。
+      仅导出默认应用模板方案到指定 JSON 文件。
+
   DefaultAppLocker.exe --import <path.json>
-      导入配置包。
+      从指定 JSON 配置包导入配置快照和默认应用模板方案。
+
   DefaultAppLocker.exe --apply-snapshot <id|alias|latest>
-      一键应用指定配置快照。
+      使用 SetUserFTA 静默应用指定配置快照；latest 表示最近创建的快照。
+
   DefaultAppLocker.exe --apply-template <id|alias|latest>
-      一键应用指定默认应用模板方案。
+      将指定默认应用模板方案合并到当前快照后使用 SetUserFTA 静默应用；latest 表示最近创建的模板方案。
+
   DefaultAppLocker.exe --restore
-      静默恢复 Config.json 中的当前快照。
+      使用 SetUserFTA 静默恢复 Config.json 中保存的当前快照。
+
+  DefaultAppLocker.exe --lock-monitor
+      执行一次“持续锁定”检查：扫描当前默认应用，与 Config.json 当前快照和覆盖项合并后的目标配置比较；如发现差异，则调用 SetUserFTA 恢复。
+      此参数通常由“持续锁定”计划任务定时调用。
+
   DefaultAppLocker.exe --help
-      显示命令行说明。
+  DefaultAppLocker.exe --?
+      显示本命令行帮助。
 """;
 }

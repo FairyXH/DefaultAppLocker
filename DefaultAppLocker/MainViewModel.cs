@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -151,14 +151,16 @@ DefaultAppLocker 是 Windows 默认应用配置管理器。软件不替代 Windo
 
 七、命令行模式
 所有命令行参数均为静默模式，不启动 GUI。常用命令：
-DefaultAppLocker.exe --capture-snapshot [别名]：扫描并保存当前配置快照。
-DefaultAppLocker.exe --export-all <path.json>：导出全部配置快照和默认应用模板方案。
-DefaultAppLocker.exe --export-snapshots <path.json>：仅导出配置快照。
-DefaultAppLocker.exe --export-templates <path.json>：仅导出默认应用模板方案。
-DefaultAppLocker.exe --import <path.json>：导入配置包。
-DefaultAppLocker.exe --apply-snapshot <id|alias|latest>：一键应用指定配置快照。
-DefaultAppLocker.exe --apply-template <id|alias|latest>：一键应用指定默认应用模板方案。
-DefaultAppLocker.exe --restore：静默恢复 Config.json 中的当前快照。
+DefaultAppLocker.exe --capture-snapshot [别名]：扫描当前用户默认应用关联，并保存为新的配置快照；别名可省略。
+DefaultAppLocker.exe --export-all <path.json>：导出全部配置快照和默认应用模板方案到指定 JSON 文件。
+DefaultAppLocker.exe --export-snapshots <path.json>：仅导出配置快照到指定 JSON 文件。
+DefaultAppLocker.exe --export-templates <path.json>：仅导出默认应用模板方案到指定 JSON 文件。
+DefaultAppLocker.exe --import <path.json>：从指定 JSON 配置包导入配置快照和默认应用模板方案。
+DefaultAppLocker.exe --apply-snapshot <id|alias|latest>：使用 SetUserFTA 静默应用指定配置快照；latest 表示最近创建的快照。
+DefaultAppLocker.exe --apply-template <id|alias|latest>：将指定默认应用模板方案合并到当前快照后使用 SetUserFTA 静默应用；latest 表示最近创建的模板方案。
+DefaultAppLocker.exe --restore：使用 SetUserFTA 静默恢复 Config.json 中保存的当前快照。
+DefaultAppLocker.exe --lock-monitor：执行一次“持续锁定”检查；扫描当前默认应用，与目标配置比较，发现差异时调用 SetUserFTA 恢复。通常由持续锁定计划任务定时调用。
+DefaultAppLocker.exe --help 或 --?：显示命令行帮助。
 """;
 
     public SnapshotProfile? SelectedSnapshotProfile

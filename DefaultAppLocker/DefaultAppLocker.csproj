@@ -1,15 +1,25 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\DefaultAppLocker.Core\DefaultAppLocker.Core.csproj" />
   </ItemGroup>
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>..\DefaultAppLocker.ico</ApplicationIcon>
+    <Authors>FairyXH</Authors>
+    <Company>FairyXH</Company>
+    <Description>Windows default application configuration manager</Description>
+    <FileDescription>Windows default application configuration manager</FileDescription>
+    <Copyright>Copyright © FairyXH</Copyright>
+    <AssemblyTitle>Windows default application configuration manager</AssemblyTitle>
+    <Product>DefaultAppLocker</Product>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
+    <InformationalVersion>1.0.4</InformationalVersion>
   </PropertyGroup>
-
 </Project>

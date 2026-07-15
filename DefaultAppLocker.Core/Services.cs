@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Win32;
@@ -231,7 +231,22 @@ public sealed class ConfigurationStore
     public void AppendLog(string message)
     {
         var path = Path.Combine(LogsDirectory, DateTimeOffset.Now.ToString("yyyyMMdd") + ".log");
-        File.AppendAllText(path, $"[{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}] {message}{Environment.NewLine}", Encoding.UTF8);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        var line = $"[{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}] {message}{Environment.NewLine}";
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            try
+            {
+                using var stream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                using var writer = new StreamWriter(stream, Encoding.UTF8);
+                writer.Write(line);
+                return;
+            }
+            catch (IOException) when (attempt < 4)
+            {
+                Thread.Sleep(50);
+            }
+        }
     }
 
     private static List<T> LoadProfiles<T>(string directory)

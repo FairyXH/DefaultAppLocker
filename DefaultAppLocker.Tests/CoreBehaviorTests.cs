@@ -1,3 +1,4 @@
+﻿using System.Text;
 using DefaultAppLocker.Core;
 using Xunit;
 
@@ -151,12 +152,58 @@ public sealed class CoreBehaviorTests
         var result = await cli.RunAsync(["--export-snapshots", exportPath]);
         var imported = new ConfigurationStore(Path.Combine(Path.GetTempPath(), "DefaultAppLockerTests", Guid.NewGuid().ToString("N")));
         var importResult = imported.ImportPackage(exportPath);
+        var help = (await cli.RunAsync(["--help"])).Message;
 
         Assert.True(result.Handled);
         Assert.Equal(0, result.ExitCode);
         Assert.Equal(1, importResult.Snapshots);
         Assert.Equal(0, importResult.TemplateProfiles);
-        Assert.Contains("--apply-snapshot", (await cli.RunAsync(["--help"])).Message);
+        Assert.Contains("--apply-snapshot", help);
+        Assert.Contains("--lock-monitor", help);
+        Assert.Contains("--?", help);
+    }
+
+    [Fact]
+    public async Task CommandLine_LockMonitor_IsHandledAndRunsSingleCheck()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "DefaultAppLockerTests", Guid.NewGuid().ToString("N"));
+        var store = new ConfigurationStore(dir);
+        store.SaveConfig(new AppConfig
+        {
+            Snapshot = new DefaultAppSnapshot
+            {
+                Associations = [new AppAssociation { Identifier = ".fake", Kind = AssociationKind.FileExtension, ProgId = "Fake.App" }]
+            }
+        });
+        var cli = new DefaultAppLockerCommandLine(store, new AssociationService(), new FakeScanner());
+
+        var result = await cli.RunAsync(["--lock-monitor"]);
+
+        Assert.True(result.Handled);
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("持续锁定检查完成", result.Message);
+    }
+
+    [Fact]
+    public void CommandLine_UsageDocumentsEveryHandledOption()
+    {
+        var usage = DefaultAppLockerCommandLine.Usage;
+        string[] options =
+        [
+            "--capture-snapshot",
+            "--export-all",
+            "--export-snapshots",
+            "--export-templates",
+            "--import",
+            "--apply-snapshot",
+            "--apply-template",
+            "--restore",
+            "--lock-monitor",
+            "--help",
+            "--?"
+        ];
+
+        Assert.All(options, option => Assert.Contains(option, usage));
     }
 
     [Fact]
@@ -176,6 +223,7 @@ public sealed class CoreBehaviorTests
             Environment.SetEnvironmentVariable("DEFAULTAPPLOCKER_CONFIG_ROOT", previous);
         }
     }
+
     private sealed class FakeScanner : IDefaultAppScanner
     {
         public DefaultAppSnapshot ScanCurrentUser() => new()
