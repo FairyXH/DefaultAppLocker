@@ -2,13 +2,6 @@
 
 DefaultAppLocker 是一个轻量级 Windows 默认应用配置管理工具，用于保存、恢复、比较和锁定当前用户的默认应用关联配置。
 
-它的定位不是替代 Windows 设置应用，而是作为系统工具补充：
-
-- Windows 设置负责修改默认应用。
-- DefaultAppLocker 负责保存当前状态、恢复到目标状态、比较差异、快速套用常见配置，并在需要时保持配置不被意外改变。
-
-界面风格以 Windows 11 系统工具为目标，参考 Windows Settings、PowerToys、Windows Security，并加入轻量的 Fluent / Mica / 玻璃层次感。
-
 ---
 
 ## 功能特性
