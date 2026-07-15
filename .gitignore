@@ -1,0 +1,22 @@
+# Build outputs
+bin/
+obj/
+publish/
+TestResults/
+*.user
+*.suo
+*.cache
+*.log
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.DotSettings.user
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local tools / temporary files
+*.tmp
+*.temp

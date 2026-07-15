@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="DefaultAppLocker.Core/DefaultAppLocker.Core.csproj" />
+  <Project Path="DefaultAppLocker.Tests/DefaultAppLocker.Tests.csproj" />
+  <Project Path="DefaultAppLocker/DefaultAppLocker.csproj" />
+</Solution>
